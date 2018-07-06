@@ -6,7 +6,7 @@ defmodule UTFSearcher do
 
     stream = File.stream!(filename, [:read], :line)
     # IO.inspect(stream)
-    len = stream
+    stream
     |> Stream.each(fn line ->
       cond do
         String.contains?(line, request) ->
@@ -18,11 +18,9 @@ defmodule UTFSearcher do
           # send(pid, {self(), :not_found, filename})
       end
     end)
-    |> Enum.to_list()
-    |> length()
+    |> Stream.run()
 
-    res = Agent.get(pid, fn state -> respond(state) end)
-    res
+    Agent.get(pid, fn state -> respond(state) end)
   end
 
   defp jaro_in_string(str, request, minaccuracy) do
