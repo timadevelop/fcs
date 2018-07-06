@@ -5,26 +5,11 @@ defmodule UTFSearcherSync do
     {:ok, pid} = Agent.start(fn -> 0 end)
 
     case find_in(filename, request) do
-      :not_found -> respond(0)
-      val -> respond(1)
+      :not_found -> :not_found
+      {:ok, line} -> {:ok, line}
     end
-    #     res = Agent.get(pid, fn state -> respond(state) end)
-    # res
   end
 
-  defp jaro_in_string(str, request, minaccuracy) do
-    String.split(str, " ")
-    |> Enum.filter(fn word -> String.jaro_distance(word, request) > minaccuracy end)
-    |> length
-  end
-
-  defp respond(0) do
-    :not_found
-  end
-
-  defp respond(n) when is_number(n) do
-    {:found, n}
-  end
   defp find_in(filename, request) when is_bitstring(filename) do
     # IO.puts("Processing -> #{filename} ... ")
     # %{type: type} = File.stat!(filename)
@@ -40,20 +25,13 @@ defmodule UTFSearcherSync do
     case IO.binread(file, :all) do
       {:error, reason} ->
         :not_found
-        # File.close(file)
       data ->
         srch(data, request)
-      # :eof ->
-      #   IO.puts("eof")
-        # File.close(file)
     end
 
     :ok = File.close(file)
     case result do
-      {:ok, line} ->
-        ln = line |> String.slice(0..50) |> String.replace(~r{-[^-]*$}, "")
-        IO.puts("#{filename} :: #{ln}")
-        line
+      {:ok, line} -> {:ok, line}
       :not_found -> :not_found
       _ -> IO.puts("wat")
     end
