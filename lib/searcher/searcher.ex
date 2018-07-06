@@ -12,7 +12,8 @@ defmodule Fcs.Searcher do
   end
 
   defp find(pid, request, directory) do
-    path = Path.expand(directory)
+    path = directory
+
     cond do
       File.regular?(path) ->
         process_regular_file(pid, request, path)
@@ -28,10 +29,10 @@ defmodule Fcs.Searcher do
           t = Task.async(fn -> find(pid, request, p) end)
           Task.await(t, :infinity)
         end)
+
       true ->
         []
     end
-
 
     # cond do
     #   File.regular?(path) ->
@@ -97,9 +98,11 @@ defmodule Fcs.Searcher do
       {_pid, :not_found, _filename} ->
         receive_results()
 
-      {_pid, {:ok, line}, filename} ->
-        ln = line |> String.slice(0..50) |> String.replace(~r{-[^-]*$}, "")
-        IO.puts("#{filename} :: #{ln}")
+      {_pid, {:ok, line, request}, filename} ->
+        ln = line
+             |> String.replace(request, IO.ANSI.green() <> request <> IO.ANSI.default_color())
+
+        IO.puts("#{IO.ANSI.blue()}#{filename} #{IO.ANSI.default_color()} :: #{ln}")
         Agent.update(:search_results, fn state ->
           Map.update(state, filename, line, fn _ -> line end)
         end)

@@ -6,7 +6,7 @@ defmodule UTFSearcherSync do
 
     case find_in(filename, request) do
       :not_found -> :not_found
-      {:ok, line} -> {:ok, line}
+      {:ok, line} -> {:ok, line, request}
     end
   end
 
