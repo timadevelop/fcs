@@ -1,5 +1,7 @@
 defmodule Fcs.Supervisor do
-  @moduledoc false
+  @moduledoc """
+  Fcs Main Supervisor, runs API
+  """
 
   use Supervisor
 

@@ -1,4 +1,7 @@
 defmodule Fcs.API do
+  @moduledoc """
+  This module provides a simple API for accessing Fcs search functionality
+  """
   use GenServer
 
   def start_link do
@@ -11,6 +14,10 @@ defmodule Fcs.API do
   end
 
 
+  @doc """
+  Finds synchronously `request` in all files in `folder` directory
+  and prints time and searching results
+  """
   def bench(request, folder) do
     # IO.puts(:erlang.system_info(:logical_processors_available))
     # IO.puts(:erlang.system_info(:schedulers_online))
@@ -21,10 +28,16 @@ defmodule Fcs.API do
     IO.inspect(result)
   end
 
+  @doc """
+  Finds synchronously `request` in all files in current working directory
+  """
   def find(request) when is_binary(request) do
     GenServer.call(:fcs_api, {:find, request}) # sync
   end
 
+  @doc """
+  Finds synchronously `request` in all files in `folder` directory
+  """
   def find(request, folder) when is_binary(request) and is_binary(folder) do
     GenServer.call(:fcs_api, {:find, request, folder}, :infinity) # sync
   end

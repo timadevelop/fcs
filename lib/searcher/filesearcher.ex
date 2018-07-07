@@ -1,4 +1,4 @@
 defmodule FileSearcher do
   @callback find(pid :: PID, filename :: String, request :: String) ::
-    {:found, count :: Number} | {:not_found}
+    {:ok, line :: String, request :: String} | :not_found
 end

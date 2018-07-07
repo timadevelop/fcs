@@ -1,33 +1,69 @@
 defmodule Fcs.Searcher do
+  @moduledoc """
+  This module provides main functionality of Fcs:
+    Searching in each file of given directory recursively.
+  """
+
+  @doc """
+  Finds all files with at least one occurrence of `request` in `directory` folder.
+
+  Returns {:ok, `results`}
+    where `results` is a map %{ filename => line }
+
+  ## Examples
+
+      iex(1)> Fcs.Searcher.find("def f", ".")
+      "./lib/api/api.ex  ::   def find(request, folder, opts) when is_binary(request) and is_binary(folder) and is_list(opts) do""
+      {:ok,
+       %{
+         "./lib/api/api.ex" => "  def find(request, folder, opts) when is_binary(request) and is_binary(folder) and is_list(opts) do"
+       }}
+
+  """
   def find(request, directory) do
     Agent.start(fn -> %{} end, name: :search_results)
+    Agent.start(fn -> [] end, name: :tasks)
 
     {:ok, pid} = Task.start(fn -> receive_results() end)
 
-    :ok = find(pid, request, directory)
+    :ok = process_directory(pid, request, directory)
 
+    # wait tasks
+    s = Agent.get(:tasks, fn s -> s end, :infinity)
+    Enum.each(s, fn task ->
+      Task.await(task, :infinity)
+      # IO.puts("awaited")
+    end)
     # Agent.get(:search_results, fn state -> IO.inspect(state) end)
+    results = Agent.get(:search_results, fn state -> {:ok, state} end)
     send(pid, :stop)
     Agent.update(:search_results, fn _ -> %{} end)
+    results
   end
 
-  defp find(pid, request, directory) do
+  # recursively traverses `directory`, runs tasks processing of found file
+  defp process_directory(pid, request, directory) do
     path = directory
 
     cond do
       File.regular?(path) ->
-        process_regular_file(pid, request, path)
+        case process_regular_file(pid, request, path) do
+          :nothing -> :nothing
+          task ->
+            # IO.puts("NEW TASK")
+            Agent.update(:tasks, fn s -> [task | s] end, :infinity)
+        end
 
       File.dir?(path) ->
-        # str =
         File.ls!(path)
         |> Enum.map(fn p ->
           Path.join(path, p)
         end)
         |> Enum.map(fn p ->
           # IO.puts("run find")
-          t = Task.async(fn -> find(pid, request, p) end)
-          Task.await(t, :infinity)
+          # t = Task.async(fn -> process_directory(pid, request, p) end)
+          # Task.await(t, :infinity)
+          process_directory(pid, request, p)
         end)
 
       true ->
@@ -54,6 +90,7 @@ defmodule Fcs.Searcher do
     :ok
   end
 
+  # processes file `path` if there is a FileSearcher for file extension in Config
   defp process_regular_file(pid, request, path) do
     case get_filesearcher(path) do
       # Task.async(fn -> :ok end)
@@ -63,26 +100,27 @@ defmodule Fcs.Searcher do
 
       {:ext, module} ->
         # IO.puts("started")
-        t = async_find(pid, path, request, module)
-        Task.await(t, :infinity)
+        async_find(pid, path, request, module)
+        # Task.await(t, :infinity)
     end
   end
 
-  ##
-  defp get_filesearcher(filename) do
-    get_filesearcher(:ext, Path.extname(filename))
+  # finds FileSearcher in config for `filepath`
+  defp get_filesearcher(filepath) do
+    get_filesearcher(:ext, Path.extname(filepath))
   end
 
+  # finds FileSearcher in config for `ext`
   defp get_filesearcher(:ext, ext) do
     filesearchers = Application.get_env(:fcs, :filesearchers)
 
     case Map.get(filesearchers, ext) do
       nil -> :nothing
-      module -> {:ext, module}
+      module -> {:ext, module} # TODO: check if implements FileSearcher behaviour
     end
   end
 
-  ##
+  # runs task which will send to `pid` msg of `module.find` execution
   defp async_find(pid, filename, request, module) when is_bitstring(filename) do
     Task.async(fn ->
       send(
@@ -92,7 +130,8 @@ defmodule Fcs.Searcher do
     end)
   end
 
-  ##
+  # receive results from `FileSearcher.find/2`
+  # receives result, prints it to console and updates global agent
   defp receive_results do
     receive do
       {_pid, :not_found, _filename} ->
@@ -117,6 +156,7 @@ defmodule Fcs.Searcher do
     end
   end
 
+  # this is old find function, just for
   defp find_old(pid, request, directory) do
     wild = Path.wildcard("#{directory}/**/*")
     IO.puts("got wild")

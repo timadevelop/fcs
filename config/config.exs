@@ -29,6 +29,8 @@ config :logger, level: :warn
 #
 #     import_config "#{Mix.env}.exs"
 
+# filesearchers
+# extension -> filesearcher implementation
 config :fcs, maxThreads: 5, filesearchers: %{
   ".ex" => UTFSearcherSync,
   ".txt" => UTFSearcherSync,
