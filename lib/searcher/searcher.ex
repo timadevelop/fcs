@@ -38,6 +38,7 @@ defmodule Fcs.Searcher do
     results = Agent.get(:search_results, fn state -> {:ok, state} end)
     send(pid, :stop)
     Agent.update(:search_results, fn _ -> %{} end)
+    Agent.update(:tasks, fn _ -> [] end)
     results
   end
 
