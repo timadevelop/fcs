@@ -13,10 +13,9 @@ defmodule UTFSearcher do
     stream
     |> Stream.each(fn line ->
       cond do
-        String.contains?(line, request) ->
-          # send(pid, {self(), line, filename})
-          :ok = Agent.update(pid, fn state -> [line | state] end)
+        String.contains?(line, request) ||
         jaro_in_string(line, request, min_jaro_distance) > 0 ->
+          # send(pid, {self(), line, filename})
           :ok = Agent.update(pid, fn state -> [line | state] end)
         true ->
           :ok = Agent.update(pid, fn state -> state end)

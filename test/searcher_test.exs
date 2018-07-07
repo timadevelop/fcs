@@ -7,7 +7,6 @@ defmodule Fcs.SearcherTest do
     assert 0 < test_find("def", "./test")
     assert 0 < test_find("test", "./test")
     assert 0 < test_find("assert", "./test")
-    assert 0 < test_find("test_find", "./test")
     assert 0 < test_find("end", "./test")
     # test_find("String", "./test")
   end

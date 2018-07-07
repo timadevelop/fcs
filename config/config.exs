@@ -31,12 +31,12 @@ config :logger, level: :warn
 
 # filesearchers
 # extension -> filesearcher implementation
-config :fcs, maxThreads: 5, min_jaro_distance: 0.5,
+config :fcs, maxThreads: 5, min_jaro_distance: 0.8,
 filesearchers: %{
-  ".ex" => UTFSearcher,
-  ".txt" => UTFSearcher,
-  ".cpp" => UTFSearcher,
-  ".exs" => UTFSearcher,
-  ".html" => UTFSearcher,
-  ".php" => UTFSearcher
+  ".ex" => UTFSearcherSync,
+  ".txt" => UTFSearcherSync,
+  ".cpp" => UTFSearcherSync,
+  ".exs" => UTFSearcherSync,
+  ".html" => UTFSearcherSync,
+  ".php" => UTFSearcherSync
 }
