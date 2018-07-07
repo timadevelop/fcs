@@ -5,7 +5,6 @@ defmodule Fcs.API.Supervisor do
 
   use Supervisor
 
-  @impl true
   def start_link do
     Supervisor.start_link(__MODULE__, [])
   end

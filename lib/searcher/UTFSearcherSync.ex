@@ -11,7 +11,7 @@ defmodule UTFSearcherSync do
           `{:ok, file_line, request}`
   """
   def find(filename, request) do
-    {:ok, pid} = Agent.start(fn -> 0 end)
+    # {:ok, pid} = Agent.start(fn -> 0 end)
 
     case find_in(filename, request) do
       :not_found -> :not_found
@@ -25,16 +25,16 @@ defmodule UTFSearcherSync do
     # %{type: type} = File.stat!(filename)
     # IO.inspect(type)
     case File.open(filename, [:read]) do
-      {:ok, file} -> find_in_iodevice(filename, file, request)
+      {:ok, file} -> find_in_iodevice(file, request)
       _ -> :not_found
     end
   end
 
   # reads the whole file, processes and closes iodevice `file`
-  defp find_in_iodevice(filename, file, request) do
+  defp find_in_iodevice(file, request) do
     result =
     case IO.binread(file, :all) do
-      {:error, reason} ->
+      {:error, _reason} ->
         :not_found
       data ->
         process(data, request)

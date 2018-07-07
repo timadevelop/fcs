@@ -157,41 +157,41 @@ defmodule Fcs.Searcher do
   end
 
   # this is old find function, just for
-  defp find_old(pid, request, directory) do
-    wild = Path.wildcard("#{directory}/**/*")
-    IO.puts("got wild")
-
-    wild
-    |> Stream.map(fn filename ->
-      case get_filesearcher(filename) do
-        # Task.async(fn -> :ok end)
-        :nothing ->
-          :nothing
-
-        {:ext, module} ->
-          # IO.puts("Processing #{filename}")
-          async_find(pid, filename, request, module)
-          # Task.await(task)
-      end
-    end)
-    |> Stream.each(fn x ->
-      case x do
-        :nothing ->
-          :nothing
-
-        task ->
-          # IO.puts(">")
-          # IO.inspect(task)
-          Task.await(task, :infinity)
-      end
-    end)
-    |> Stream.run()
-
-    tasks
-    |> Enum.each(fn t -> Task.await(t, :infinity) end)
-
-    :ok
-  end
+  # defp find_old(pid, request, directory) do
+  #   wild = Path.wildcard("#{directory}/**/*")
+  #   IO.puts("got wild")
+  #
+  #   wild
+  #   |> Stream.map(fn filename ->
+  #     case get_filesearcher(filename) do
+  #       # Task.async(fn -> :ok end)
+  #       :nothing ->
+  #         :nothing
+  #
+  #       {:ext, module} ->
+  #         # IO.puts("Processing #{filename}")
+  #         async_find(pid, filename, request, module)
+  #         # Task.await(task)
+  #     end
+  #   end)
+  #   |> Stream.each(fn x ->
+  #     case x do
+  #       :nothing ->
+  #         :nothing
+  #
+  #       task ->
+  #         # IO.puts(">")
+  #         # IO.inspect(task)
+  #         Task.await(task, :infinity)
+  #     end
+  #   end)
+  #   |> Stream.run()
+  #
+  #   # tasks
+  #   # |> Enum.each(fn t -> Task.await(t, :infinity) end)
+  #
+  #   :ok
+  # end
 
   # defp search_in(pid, filenames, request) do
   #   # TODO: https://elixir-lang.bg/archive/posts/types_and_behaviours

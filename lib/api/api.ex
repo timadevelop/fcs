@@ -42,10 +42,10 @@ defmodule Fcs.API do
     GenServer.call(:fcs_api, {:find, request, folder}, :infinity) # sync
   end
 
-  def find(request, folder, opts) when is_binary(request) and is_binary(folder) and is_list(opts) do
-    GenServer.call(:fcs_api, {:find, request, folder, opts}) # sync
-  end
-
+  # def find(request, folder, opts) when is_binary(request) and is_binary(folder) and is_list(opts) do
+  #   GenServer.call(:fcs_api, {:find, request, folder, opts}) # sync
+  # end
+  #
   # Callbacks
 
   @impl true
@@ -58,10 +58,10 @@ defmodule Fcs.API do
     {:reply, Fcs.Searcher.find(request, folder), state}
   end
 
-  @impl true
-  def handle_call({:find, request, folder, opts}, _from, state) do
-    {:reply, Fcs.Searcher.find(request, folder, opts), state}
-  end
+  # @impl true
+  # def handle_call({:find, request, folder, opts}, _from, state) do
+  #   {:reply, Fcs.Searcher.find(request, folder, opts), state}
+  # end
 
 
 end
